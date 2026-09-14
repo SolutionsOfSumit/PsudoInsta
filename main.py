@@ -1,5 +1,4 @@
-from fastapi import FastAPI
-from fastapi.params import Body
+from fastapi import FastAPI, Body, Response
 from pydantic import BaseModel
 from typing import Optional 
 from random import randrange
@@ -8,7 +7,7 @@ app = FastAPI()
 
 def find_post(id):
     for post in my_memory:
-            if int(id) == post["id"]:
+            if id == post["id"]:
                 return post
 
 class Post(BaseModel):
@@ -31,6 +30,7 @@ my_memory = [
 ]
 @app.get("/posts")
 def root():
+    print("Request Successful")
     return {"data": my_memory} 
 
 @app.get('/posts/latest')
@@ -39,8 +39,11 @@ def get_latest():
     return {"data": post}
 
 @app.get('/posts/{id}')
-def get_post(id):
+def get_post(id: int, response: Response):
     post = find_post(id)
+    if not post:
+        response.status_code = 404
+        return {"message": f"post with id: {id} does not exist"}
     return {"data": post}
 
 @app.post('/posts')
