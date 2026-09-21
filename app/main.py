@@ -2,27 +2,27 @@ from fastapi import FastAPI, Body, Response, status, HTTPException
 from pydantic import BaseModel
 from typing import Optional 
 from random import randrange
+import psycopg2
+from psycopg2.extras import RealDictCursor
 
 app = FastAPI()
 
-def find_post(id):
-    for post in my_memory:
-            if id == post["id"]:
-                return post
-
-def find_post_index(id):
-    for i, p in enumerate(my_memory):
-        if p["id"] == id: 
-            return i
-
-
 class Post(BaseModel):
-    title: Optional[str] = None
-    content: Optional[str] = None
-    publish: Optional[bool] = None
-    rating: Optional[int] = None
+    title:str
+    content:str
+    publish: bool = True
 
+while True: 
+    try:
+        conn = psycopg2.connect("dbname=FastAPI user=postgres password=Sumit@123", cursor_factory=RealDictCursor)
+        cursor = conn.cursor()
+        print("Database connected successfully")
+        break
+    except Exception as error:
+        print("Connecting to database failed")
+        print("Error was:", error)
 
+    
 my_memory = [
     {
         "title": "Title of post 1",
@@ -35,10 +35,26 @@ my_memory = [
         "id": 2
     }
 ]
+
+
+def find_post(id):
+    for post in my_memory:
+            if id == post["id"]:
+                return post
+
+def find_post_index(id):
+    for i, p in enumerate(my_memory):
+        if p["id"] == id: 
+            return i
+
+
+
 @app.get("/posts")
-def root():
-    print("Request Successful")
-    return {"data": my_memory} 
+def get_posts():
+    cursor.execute("""SELECT * FROM posts""")
+    posts = cursor.fetchall()
+    print("Fetch successful")
+    return posts
 
 @app.get('/posts/latest')
 def get_latest():
@@ -46,19 +62,17 @@ def get_latest():
     return {"data": post}
 
 @app.get('/posts/{id}')
-def get_post(id: int, response: Response):
-    post = find_post(id)
-    if not post:
-        response.status_code = status.HTTP_404_NOT_FOUND
-        return {"message": f"post with id: {id} does not exist"}
-    return {"data": post}
+def get_post(id: int):
+    cursor.execute("""SELECT * FROM posts WHERE id = %s """,(str(id)))
+    post = cursor.fetchone()
+    return post
 
 @app.post('/posts', status_code= status.HTTP_201_CREATED)
 def create_post(new_post: Post):
-    post_dict = new_post.model_dump()
-    post_dict["id"] = randrange(1, 1000000000000000)
-    my_memory.append(post_dict)
-    return {"data": post_dict}
+    cursor.execute("""INSERT INTO posts (title, content, publish) VALUES (%s,%s,%s) RETURNING * """, (new_post.title, new_post.content, new_post.publish))
+    new_post = cursor.fetchone()
+    conn.commit()
+    return new_post 
 
 @app.delete('/posts/{id}', status_code= status.HTTP_204_NO_CONTENT)
 def delete_post(id: int):
