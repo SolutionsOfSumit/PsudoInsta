@@ -48,7 +48,6 @@ def find_post_index(id):
             return i
 
 
-
 @app.get("/posts")
 def get_posts():
     cursor.execute("""SELECT * FROM posts""")
@@ -63,8 +62,10 @@ def get_latest():
 
 @app.get('/posts/{id}')
 def get_post(id: int):
-    cursor.execute("""SELECT * FROM posts WHERE id = %s """,(str(id)))
+    cursor.execute("""SELECT * FROM posts WHERE id = %s """,(str(id),))
     post = cursor.fetchone()
+    if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not Found")
     return post
 
 @app.post('/posts', status_code= status.HTTP_201_CREATED)
@@ -76,10 +77,11 @@ def create_post(new_post: Post):
 
 @app.delete('/posts/{id}', status_code= status.HTTP_204_NO_CONTENT)
 def delete_post(id: int):
-    index = find_post_index(id)
-    if index == None:
-        raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail=f"The post with the id: {id} does not exist")
-    my_memory.pop(index)
+    cursor.execute("""DELETE FROM posts WHERE id = %s returning * """, (str(id),))
+    deleted_post = cursor.fetchone()
+    conn.commit()
+    if deleted_post == None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Can't able to find the post")
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @app.put('/posts/{id}')
