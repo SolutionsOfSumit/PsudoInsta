@@ -1,16 +1,17 @@
-from fastapi import FastAPI, Body, Response, status, HTTPException
+from fastapi import FastAPI, Body, Response, status, HTTPException, Depends 
 from pydantic import BaseModel
 from typing import Optional 
 from random import randrange
 import psycopg2
 from psycopg2.extras import RealDictCursor
+from . import models
+from .db_connection import engine, SessionLocal, get_db
+from sqlalchemy.orm import Session
+
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-class Post(BaseModel):
-    title:str
-    content:str
-    publish: bool = True
 
 while True: 
     try:
@@ -86,12 +87,11 @@ def delete_post(id: int):
 
 @app.put('/posts/{id}')
 def update_post(id: int, post: Post):
-    index = find_post_index(id)
-    if index == None:
+    cursor.execute("""UPDATE posts SET title = %s, content = %s, publish = %s where id = %s RETURNING *""",(post.title, post.content, post.publish, str(id),))
+    updated_post = cursor.fetchone()
+    if updated_post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Post Found")
-    post = post.model_dump()
-    post["id"] = id
-    my_memory[index] = post
+    conn.commit()
     print("post updated")
     return {"detail": post}
 
@@ -104,3 +104,8 @@ def partial_update_post(id: int, post: Post):
     my_memory[index].update(post)
     print("Updated successfully")
     return {"detail": my_memory[index]}
+
+# Test Code
+@app.get('/test')
+def test_post(db: Session = Depends(get_db)):
+    return {"status": "Success for now"}

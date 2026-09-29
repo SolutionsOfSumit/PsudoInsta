@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, status 
 from pydantic import BaseModel
 
 
@@ -14,3 +14,5 @@ my_list = []
 def demo_post(post: Post):
     print(post)
     return {"detail": post}
+
+status.HTTP_200_OK
