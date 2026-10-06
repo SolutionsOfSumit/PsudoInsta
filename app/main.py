@@ -50,9 +50,8 @@ def find_post_index(id):
 
 
 @app.get("/posts")
-def get_posts():
-    cursor.execute("""SELECT * FROM posts""")
-    posts = cursor.fetchall()
+def get_posts(db: Session= Depends(get_db)):
+    posts = db.query(models.Post).all()
     print("Fetch successful")
     return posts
 
@@ -108,4 +107,5 @@ def partial_update_post(id: int, post: Post):
 # Test Code
 @app.get('/test')
 def test_post(db: Session = Depends(get_db)):
-    return {"status": "Success for now"}
+    post = db.query(models.Post).all()
+    return {"status": post}
