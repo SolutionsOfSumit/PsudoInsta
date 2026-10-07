@@ -107,5 +107,6 @@ def partial_update_post(id: int, post: Post):
 # Test Code
 @app.get('/test')
 def test_post(db: Session = Depends(get_db)):
-    post = db.query(models.Post).all()
-    return {"status": post}
+    post = db.query(models.Post)
+    print(post)
+    return {"data": post }
