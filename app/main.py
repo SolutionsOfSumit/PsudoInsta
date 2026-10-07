@@ -23,20 +23,6 @@ while True:
         print("Connecting to database failed")
         print("Error was:", error)
 
-    
-my_memory = [
-    {
-        "title": "Title of post 1",
-        "content": "Contents of post 1",
-        "id": 1
-    },
-    {
-        "title": "Title of post 2",
-        "content": "Content of post 2",
-        "id": 2
-    }
-]
-
 
 def find_post(id):
     for post in my_memory:
@@ -69,7 +55,7 @@ def get_post(id: int):
     return post
 
 @app.post('/posts', status_code= status.HTTP_201_CREATED)
-def create_post(new_post: Post):
+def create_post(new_post: Post, db : Session =  Depends):
     cursor.execute("""INSERT INTO posts (title, content, publish) VALUES (%s,%s,%s) RETURNING * """, (new_post.title, new_post.content, new_post.publish))
     new_post = cursor.fetchone()
     conn.commit()
@@ -105,8 +91,3 @@ def partial_update_post(id: int, post: Post):
     return {"detail": my_memory[index]}
 
 # Test Code
-@app.get('/test')
-def test_post(db: Session= Depends(get_db)):
-    post = db.query(models.Post).all()
-    print(post)
-    return {"data": post }
