@@ -53,7 +53,7 @@ def find_post_index(id):
 def get_posts(db: Session= Depends(get_db)):
     posts = db.query(models.Post).all()
     print("Fetch successful")
-    return posts
+    return {"data": posts}
 
 @app.get('/posts/latest')
 def get_latest():
@@ -106,7 +106,7 @@ def partial_update_post(id: int, post: Post):
 
 # Test Code
 @app.get('/test')
-def test_post(db: Session = Depends(get_db)):
-    post = db.query(models.Post)
+def test_post(db: Session= Depends(get_db)):
+    post = db.query(models.Post).all()
     print(post)
     return {"data": post }
