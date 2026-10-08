@@ -12,6 +12,10 @@ models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
+class Post(BaseModel):
+    title: str
+    content: str
+    publish: bool = True
 
 while True: 
     try:
@@ -55,11 +59,12 @@ def get_post(id: int):
     return post
 
 @app.post('/posts', status_code= status.HTTP_201_CREATED)
-def create_post(new_post: Post, db : Session =  Depends):
-    cursor.execute("""INSERT INTO posts (title, content, publish) VALUES (%s,%s,%s) RETURNING * """, (new_post.title, new_post.content, new_post.publish))
-    new_post = cursor.fetchone()
-    conn.commit()
-    return new_post 
+def create_post(new_post: Post, db : Session =  Depends(get_db)):
+    new_post = models.Post(title=new_post.title, content=new_post.content, publish=new_post.publish )
+    db.add(new_post)
+    db.commit
+    db.refresh(new_post)
+    return {"data": new_post}
 
 @app.delete('/posts/{id}', status_code= status.HTTP_204_NO_CONTENT)
 def delete_post(id: int):
