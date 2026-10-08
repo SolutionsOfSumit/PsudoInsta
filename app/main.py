@@ -62,7 +62,7 @@ def get_post(id: int):
 def create_post(new_post: Post, db : Session =  Depends(get_db)):
     new_post = models.Post(title=new_post.title, content=new_post.content, publish=new_post.publish )
     db.add(new_post)
-    db.commit
+    db.commit()
     db.refresh(new_post)
     return {"data": new_post}
 
