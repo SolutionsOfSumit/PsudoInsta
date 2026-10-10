@@ -28,17 +28,6 @@ while True:
         print("Error was:", error)
 
 
-def find_post(id):
-    for post in my_memory:
-            if id == post["id"]:
-                return post
-
-def find_post_index(id):
-    for i, p in enumerate(my_memory):
-        if p["id"] == id: 
-            return i
-
-
 @app.get("/posts")
 def get_posts(db: Session= Depends(get_db)):
     posts = db.query(models.Post).all()
