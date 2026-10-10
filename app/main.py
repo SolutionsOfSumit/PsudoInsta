@@ -40,12 +40,9 @@ def get_latest():
     return {"data": post}
 
 @app.get('/posts/{id}')
-def get_post(id: int):
-    cursor.execute("""SELECT * FROM posts WHERE id = %s """,(str(id),))
-    post = cursor.fetchone()
-    if not post:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post not Found")
-    return post
+def get_post(id: int, db: Session = Depends(get_db)):
+    post = db.query(models.Post).filter(models.Post.id ==  id).first()
+    return {"data": post}
 
 @app.post('/posts', status_code= status.HTTP_201_CREATED)
 def create_post(new_post: Post, db : Session =  Depends(get_db)):
