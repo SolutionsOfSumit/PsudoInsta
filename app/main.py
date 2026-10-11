@@ -41,8 +41,10 @@ def get_latest():
 
 @app.get('/posts/{id}')
 def get_post(id: int, db: Session = Depends(get_db)):
-    post = db.query(models.Post).filter(models.Post.id ==  id).first()
-    return {"data": post}
+    post = db.query(models.Post).filter(models.Post.id == id).first()
+    if post is None:
+        raise HTTPException(status_code=404, detail=f"Post with id {id} was not found")
+    return post
 
 @app.post('/posts', status_code= status.HTTP_201_CREATED)
 def create_post(new_post: Post, db : Session =  Depends(get_db)):
@@ -63,14 +65,21 @@ def delete_post(id: int, db: Session = Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @app.put('/posts/{id}')
-def update_post(id: int, post: Post):
-    cursor.execute("""UPDATE posts SET title = %s, content = %s, publish = %s where id = %s RETURNING *""",(post.title, post.content, post.publish, str(id),))
-    updated_post = cursor.fetchone()
-    if updated_post == None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No Post Found")
-    conn.commit()
-    print("post updated")
+def update_post(id: int, db: Session=Depends(get_db)):
+    post_query = db.query(models.Post).filter(models.Post.id == id)
+    post = post_query.first()
+        
+    if post == None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Post not found"
+            )
+
+    post_query.update({"title": "Updated 2 title", "content": "updated 2 content"}, synchronize_session=False)
+    db.commit()
     return {"detail": post}
+
+
 
 @app.patch('/posts/{id}')
 def partial_update_post(id: int, post: Post):
