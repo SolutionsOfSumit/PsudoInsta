@@ -65,7 +65,7 @@ def delete_post(id: int, db: Session = Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @app.put('/posts/{id}')
-def update_post(id: int, db: Session=Depends(get_db)):
+def update_post(id: int,npost: Post, db: Session=Depends(get_db)):
     post_query = db.query(models.Post).filter(models.Post.id == id)
     post = post_query.first()
         
@@ -75,9 +75,9 @@ def update_post(id: int, db: Session=Depends(get_db)):
             detail="Post not found"
             )
 
-    post_query.update({"title": "Updated 2 title", "content": "updated 2 content"}, synchronize_session=False)
+    post_query.update(npost.model_dump(), synchronize_session=False)
     db.commit()
-    return {"detail": post}
+    return {"detail": post_query.first()}
 
 
 
