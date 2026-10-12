@@ -4,7 +4,7 @@ from typing import Optional
 from random import randrange
 import psycopg2
 from psycopg2.extras import RealDictCursor
-from . import models
+from . import models, schemas
 from .db_connection import engine, SessionLocal, get_db
 from sqlalchemy.orm import Session
 
@@ -42,7 +42,7 @@ def get_post(id: int, db: Session = Depends(get_db)):
     return post
 
 @app.post('/posts', status_code= status.HTTP_201_CREATED)
-def create_post(new_post: Post, db : Session =  Depends(get_db)):
+def create_post(new_post: schemas.Post, db : Session =  Depends(get_db)):
     new_post = models.Post(title=new_post.title, content=new_post.content, publish=new_post.publish )
     db.add(new_post)
     db.commit()
@@ -60,7 +60,7 @@ def delete_post(id: int, db: Session = Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 @app.put('/posts/{id}')
-def update_post(id: int,npost: Post, db: Session=Depends(get_db)):
+def update_post(id: int,npost: schemas.Post, db: Session=Depends(get_db)):
     post_query = db.query(models.Post).filter(models.Post.id == id)
     post = post_query.first()
         
@@ -77,7 +77,7 @@ def update_post(id: int,npost: Post, db: Session=Depends(get_db)):
 
 
 @app.patch('/posts/{id}')
-def partial_update_post(id: int, post: Post):
+def partial_update_post(id: int, post: schemas.Post):
     index = find_post_index(id)
     if index == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)

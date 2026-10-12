@@ -1,16 +1,17 @@
 from pydantic import BaseModel
 
-class Post(BaseModel):
+class BasePost(BaseModel):
     title: str
     content: str
     publish: bool = True
 
-class CreatePost(BaseModel):
-    title: str
-    content: str
-    publish: bool = True
+class CreatePost(BasePost):
+    pass
 
-class UpdatePost(BaseModel):
+class UpdatePost(BasePost):
+    pass
+
+class PostResponse(BaseModel):
     title: str
     content: str
-    publish: bool 
+    publish: str
