@@ -1,6 +1,6 @@
 from fastapi import FastAPI, Body, Response, status, HTTPException, Depends 
 from pydantic import BaseModel
-from typing import Optional 
+from typing import Optional, List 
 from random import randrange
 import psycopg2
 from psycopg2.extras import RealDictCursor
@@ -23,18 +23,18 @@ while True:
         print("Error was:", error)
 
 
-@app.get("/posts")
+@app.get("/posts", response_model=List[schemas.PostResponse])
 def get_posts(db: Session= Depends(get_db)):
     posts = db.query(models.Post).all()
     print("Fetch successful")
     return posts
 
-@app.get('/posts/latest')
+@app.get('/posts/latest', response_model=schemas.PostResponse)
 def get_latest():
     post =my_memory[ len(my_memory) - 1 ] 
     return post
 
-@app.get('/posts/{id}')
+@app.get('/posts/{id}', response_model=schemas.PostResponse)
 def get_post(id: int, db: Session = Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id == id).first()
     if post is None:
@@ -53,13 +53,13 @@ def create_post(new_post: schemas.BasePost, db : Session =  Depends(get_db)):
 def delete_post(id: int, db: Session = Depends(get_db)):
     post = db.query(models.Post).filter(models.Post.id == id)
     if post.first() == None:
-        raise HTTPException(status_code = status.HTTP_204_NO_CONTENT)
+        raise HTTPException(status_code = status.HTTP_204_NO_CONTENT, response_model=schemas.PostResponse)
 
     post.delete(synchronize_session=False)
     db.commit()
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+    return Response(status_code=status.HTTP_204_NO_CONTENT, response_model=schemas.PostResponse)
 
-@app.put('/posts/{id}')
+@app.put('/posts/{id}', response_model=schemas.PostResponse)
 def update_post(id: int,npost: schemas.BasePost, db: Session=Depends(get_db)):
     post_query = db.query(models.Post).filter(models.Post.id == id)
     post = post_query.first()
@@ -76,7 +76,7 @@ def update_post(id: int,npost: schemas.BasePost, db: Session=Depends(get_db)):
 
 
 
-@app.patch('/posts/{id}')
+@app.patch('/posts/{id}', response_model=schemas.PostResponse)
 def partial_update_post(id: int, post: schemas.BasePost):
     index = find_post_index(id)
     if index == None:
