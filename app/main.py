@@ -42,7 +42,7 @@ def get_post(id: int, db: Session = Depends(get_db)):
     return post
 
 @app.post('/posts', status_code= status.HTTP_201_CREATED, response_model=schemas.PostResponse)
-def create_post(new_post: schemas.BasePost, db : Session =  Depends(get_db)):
+def create_post(new_post: schemas.PostBase, db : Session =  Depends(get_db)):
     new_post = models.Post(**new_post.model_dump())
     db.add(new_post)
     db.commit()
@@ -60,7 +60,7 @@ def delete_post(id: int, db: Session = Depends(get_db)):
     return Response(status_code=status.HTTP_204_NO_CONTENT, response_model=schemas.PostResponse)
 
 @app.put('/posts/{id}', response_model=schemas.PostResponse)
-def update_post(id: int,npost: schemas.BasePost, db: Session=Depends(get_db)):
+def update_post(id: int,npost: schemas.PostBase, db: Session=Depends(get_db)):
     post_query = db.query(models.Post).filter(models.Post.id == id)
     post = post_query.first()
         
@@ -77,7 +77,7 @@ def update_post(id: int,npost: schemas.BasePost, db: Session=Depends(get_db)):
 
 
 @app.patch('/posts/{id}', response_model=schemas.PostResponse)
-def partial_update_post(id: int, post: schemas.BasePost):
+def partial_update_post(id: int, post: schemas.PostBase):
     index = find_post_index(id)
     if index == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
@@ -86,4 +86,18 @@ def partial_update_post(id: int, post: schemas.BasePost):
     print("Updated successfully")
     return {"detail": my_memory[index]}
 
-# Test Code
+# STARTING USERERES FROM HERE
+@app.get("/users", response_model=List[schemas.BaseUser])
+def get_users(db: Session = Depends(get_db)):
+    users = db.query(models.User).all()
+    print("Fetch Successful")
+    return users
+
+@app.post("/users", response_model=schemas.UserResponse)
+def get_user(new_user: schemas.CreateUser, db: Session = Depends(get_db)):
+    user = models.User(**new_user.model_dump())
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+    return user
+
