@@ -110,3 +110,10 @@ def get_user(id: int, db: Session =  Depends(get_db)):
     if user == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
+
+@app.delete("/users/{id}")
+def delete_user(id : int, db: Session = Depends(get_db)):
+    user = db.query(models.User).filter(models.User.id == id).first()
+    db.delete(user)
+    db.commit()
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
