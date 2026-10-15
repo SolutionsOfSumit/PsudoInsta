@@ -89,7 +89,7 @@ def partial_update_post(id: int, post: schemas.PostBase):
     return {"detail": my_memory[index]}
 
 # STARTING USERERES FROM HERE
-@app.get("/users", response_model=List[schemas.BaseUser])
+@app.get("/users", response_model=List[schemas.UserResponse])
 def get_users(db: Session = Depends(get_db)):
     users = db.query(models.User).all()
     print("Fetch Successful")
