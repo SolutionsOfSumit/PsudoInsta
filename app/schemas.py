@@ -28,6 +28,7 @@ class PostResponse(PostBase):
         orm_model = True
 
 class UserResponse(BaseUser):
+    id: int
     created_at: datetime
 
     class Config: 
