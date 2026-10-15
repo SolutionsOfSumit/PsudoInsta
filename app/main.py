@@ -98,8 +98,8 @@ def get_users(db: Session = Depends(get_db)):
 @app.post("/users", response_model=schemas.UserResponse)
 def get_user(new_user: schemas.CreateUser, db: Session = Depends(get_db)):
 
-    hashed_password = pwd_context.hash(user.password)
-    user.password = hashed_password
+    hashed_password = pwd_context.hash(new_user.password)
+    new_user.password = hashed_password
     user = models.User(**new_user.model_dump())
     db.add(user)
     db.commit()
