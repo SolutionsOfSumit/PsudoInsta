@@ -7,7 +7,9 @@ from psycopg2.extras import RealDictCursor
 from . import models, schemas
 from .db_connection import engine, SessionLocal, get_db
 from sqlalchemy.orm import Session
+from passlib.context import CryptContext
 
+pwd_context = CryptContext(schemes=["bcrypt"],deprecated="auto")
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
@@ -95,6 +97,9 @@ def get_users(db: Session = Depends(get_db)):
 
 @app.post("/users", response_model=schemas.UserResponse)
 def get_user(new_user: schemas.CreateUser, db: Session = Depends(get_db)):
+
+    hashed_password = pwd_context.hash(user.password)
+    user.password = hashed_password
     user = models.User(**new_user.model_dump())
     db.add(user)
     db.commit()
