@@ -7,6 +7,7 @@ from psycopg2.extras import RealDictCursor
 from . import models, schemas, utils
 from .db_connection import engine, SessionLocal, get_db
 from sqlalchemy.orm import Session
+from .routers import post, user
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -21,3 +22,7 @@ while True:
     except Exception as error:
         print("Connecting to database failed")
         print("Error was:", error)
+
+
+app.include_router(post.router)
+app.include_router(user.router)

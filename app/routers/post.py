@@ -7,8 +7,6 @@ from .. import schemas, models
 router = APIRouter()
 
 
-
-
 @router.get("/posts", response_model=List[schemas.PostResponse])
 def get_posts(db: Session= Depends(get_db)):
     posts = db.query(models.Post).all()
@@ -17,7 +15,7 @@ def get_posts(db: Session= Depends(get_db)):
 
 @router.get('/posts/latest', response_model=schemas.PostResponse)
 def get_latest(db: Session = Depends(get_db)):
-    post = db.query(models.Post).order(models.Post.created_at.desc()).first()
+    post = db.query(models.Post).order_by(models.Post.created_at.desc()).first()
     if post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"The post does not exist"})
     return post
