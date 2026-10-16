@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Response, Depends, APIRouter, HTTPException
+from fastapi import FastAPI, Response, Depends, APIRouter, HTTPException, status
 from typing import List
 from sqlalchemy.orm import Session
 from ..db_connection import get_db
@@ -17,7 +17,9 @@ def get_posts(db: Session= Depends(get_db)):
 
 @router.get('/posts/latest', response_model=schemas.PostResponse)
 def get_latest(db: Session = Depends(get_db)):
-    post =my_memory[ len(my_memory) - 1 ] 
+    post = db.query(models.Post).order(models.Post.created_at.desc()).first()
+    if post == None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"The post does not exist"})
     return post
 
 @router.get('/posts/{id}', response_model=schemas.PostResponse)
