@@ -24,7 +24,7 @@ def delete_user(id : int, db: Session = Depends(get_db)):
 
 @router.post("/", response_model=schemas.UserResponse)
 def create_user(user: schemas.CreateUser, db: Session = Depends(get_db)):
-    user.password = hash(user.password)
+    user.password = utils.hash(user.password)
     new_user = models.User(**user.model_dump())
     db.add(new_user)
     db.commit()
