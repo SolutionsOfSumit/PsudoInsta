@@ -4,7 +4,8 @@ from ..db_connection import get_db
 from sqlalchemy.orm import Session 
 
 router = APIRouter(
-    prefix="/users"
+    prefix="/users",
+    tags = ["Users"]
 )
 
 @router.get("/{id}", response_model=schemas.UserResponse)
