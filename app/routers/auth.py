@@ -8,7 +8,7 @@ router = APIRouter(
     tags = ["auth"]
 )
 
-@router.post("/")
+@router.post("/", response_model=schemas.Token)
 def login(user_credentials: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(db_connection.get_db)):
     user = db.query(models.User).filter(models.User.email == user_credentials.username).first()
     if not user: 

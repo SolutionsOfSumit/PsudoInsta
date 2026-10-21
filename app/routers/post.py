@@ -32,7 +32,7 @@ def get_post(id: int, db: Session = Depends(get_db)):
 
 @router.post('/', status_code= status.HTTP_201_CREATED, response_model=schemas.PostResponse)
 def create_post(new_post: schemas.PostBase, db : Session =  Depends(get_db), current_user : int = Depends(oauth2.get_current_user)):
-    print(current_user)
+    print(current_user.email)
     new_post = models.Post(**new_post.model_dump())
     db.add(new_post)
     db.commit()
