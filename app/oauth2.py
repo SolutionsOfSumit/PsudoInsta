@@ -1,6 +1,10 @@
 from jose import JWTError, jwt
 from datetime import datetime, timedelta, timezone
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
 from . import schemas
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
 SECRET_KEY = "Hello_World"
 ALGORITHM = "HS256"
@@ -10,12 +14,12 @@ def create_token(data: dict):
     encoded_data = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(minutes=EXPIRE_TIME_IN_MINUTES)
     encoded_data.update({"exp": expire})
-    encoded_jwt = jwt.encode(encoded_data, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(encoded_data, SECRET_KEY, algorithm=[ALGORITHM])
     return encoded_jwt
 
 def verify_token(token: str, credentials_exception):
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         id : str = payload.get("user_id")
         if id is None: 
             raise credentials_exception
@@ -24,3 +28,7 @@ def verify_token(token: str, credentials_exception):
         raise credentials_exception
 
     return token_data
+
+def get_current_user(token : str = Depends(oauth2_scheme)):
+    credentials_exception = HTTPException(status_code= status.HTTP_403_FORBIDDEN, detail= "Could not validate credentials ", headers={"WWW-Authentication":"Bearer"})
+    return verify_token(token, credentials_exception)
