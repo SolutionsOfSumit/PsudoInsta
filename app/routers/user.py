@@ -1,4 +1,5 @@
 from fastapi import HTTPException, Depends, Response, status, FastAPI, APIRouter
+from typing import List
 from .. import schemas, utils, models
 from ..db_connection import get_db
 from sqlalchemy.orm import Session 
@@ -7,6 +8,11 @@ router = APIRouter(
     prefix="/users",
     tags = ["Users"]
 )
+
+@router.get("/", response_model=List[schemas.UserResponse])
+def get_users(db: Session = Depends(get_db)):
+    users = db.query(models.User).all()
+    return users 
 
 @router.get("/{id}", response_model=schemas.UserResponse)
 def get_user(id: int, db: Session =  Depends(get_db)):
