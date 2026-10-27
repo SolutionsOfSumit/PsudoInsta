@@ -37,9 +37,18 @@ def get_latest(db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail={"The post does not exist"})
     return post
 
-@router.get('/{id}', response_model=schemas.PostResponse)
+@router.get('/{id}', response_model=schemas.PostOut)
 def get_post(id: int, db: Session = Depends(get_db)):
-    post = db.query(models.Post).filter(models.Post.id == id).first()
+    post = (
+            db.query(models.Post, func.count(models.Voting.user_id).label("votes"))
+            .join(models.Voting, models.Post.id == models.Voting.post_id, isouter=True)
+            .group_by(models.Post.id)
+            .filter(models.Post.id == id)
+        )
+
+    print(post)
+
+    post = post.first()
     if post is None:
         raise HTTPException(status_code=404, detail=f"Post with id {id} was not found")
     return post
