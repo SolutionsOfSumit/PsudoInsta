@@ -31,6 +31,10 @@ class PostResponse(PostBase):
     class Config:
         orm_model = True
 
+class PostOut(BaseModel):
+    Post: PostResponse
+    votes: int
+
 class UserResponse(BaseUser):
     id: int
     created_at: datetime
