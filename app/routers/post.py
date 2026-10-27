@@ -20,6 +20,9 @@ def get_posts(db: Session= Depends(get_db), limit: int = 5, skip: int = 0, searc
         db.query(models.Post, func.count(models.Voting.user_id).label("votes"))
         .join(models.Voting, models.Post.id == models.Voting.post_id, isouter=True)
         .group_by(models.Post.id)
+        .filter(models.Post.title.contains(search))
+        .limit(limit)
+        .offset(skip)
         .all()
     )
 
