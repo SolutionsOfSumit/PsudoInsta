@@ -22,14 +22,18 @@ def vote(vote:schemas.Vote, db: Session = Depends(db_connection.get_db), current
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="You have already voted on this image")
 
         new_vote = models.Voting(post_id= vote.post_id, user_id= current_user.id)
+
+        print(new_vote)
+
         db.add(new_vote)
         db.commit()
         return {"message":"Successfully Created Vote"}
     else:
         if not found_vote:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Post does not exist")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="vote does not exist")
+        print(vote_query)
         vote_query.delete(synchronize_session=False)
-        db.commit
+        db.commit()
 
         return {"message": "Successfully Deleted Vote"}
 
