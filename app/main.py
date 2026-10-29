@@ -3,7 +3,7 @@ from . import models
 from .db_connection import engine
 from .routers import post, user, auth, votes
 
-models.Base.metadata.create_all(bind=engine)
+# models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
